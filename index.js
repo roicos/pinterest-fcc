@@ -24,11 +24,11 @@ app.use(session(
 // db
 const pg = require("pg");
 var dbClient = new pg.Client({
-    user: "user",
-    password: "secretPassword",
-    database: "myDB",
+    user: "kqrrmlvmbmiuxo",
+    password: "9905205bd96665bcfeff239da6bf6a6740bbe6cea52227e2553c889f4fb9778a",
+    database: "d5n6384osfuqnh",
     port: 5432,
-    host: "myHost",
+    host: "ec2-184-73-196-65.compute-1.amazonaws.com",
     ssl: true
 });
 dbClient.connect();

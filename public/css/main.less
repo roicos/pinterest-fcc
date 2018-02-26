@@ -1,3 +1,11 @@
+/*http://colorpalettes.net/color-palette-468/*/
+
+@white: #f6f7f2;
+@darkBlue: #0a1944;
+@blue: #a5b5c4;
+@grey: #d9d8dd;
+
+
 html, body {
 	margin:0;
 	padding:0;
@@ -6,12 +14,47 @@ html, body {
 
 body{
 	font-size: 14px;
+	background-color: @darkBlue;
 }
 
 #header{
 	width: 100%;
 	line-height: 20px;
-	padding: 20px;
+}
+
+.wide {
+  width:100%;
+  height:300px;
+  background-image:url('../img/birds-header-res.jpg');
+}
+
+.navbar {
+	height: 70px;
+}
+
+.navbar-inverse {
+    background-color: @darkBlue;
+    border-color: @blue;
+}
+
+.navbar .nav{
+	margin-top: 15px;
+}
+
+.navbar .nav li {
+	border-left: 3px solid transparent;
+}
+
+.navbar .nav li:hover {
+	border-left: 3px solid @blue;
+}
+
+.navbar .nav li a{
+	color: @white;
+}
+
+.navbar .nav li:hover a{
+	color: @blue;
 }
 
 #main{

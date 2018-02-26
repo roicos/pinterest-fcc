@@ -3,8 +3,13 @@ module.exports = function (express, app, path, bcrypt, dbClient) {
 	app.use(express.static(path.join(__dirname, "../public")));
 
 	function checkAuth(req, res, next){
-		if (req.url === "/" && (!req.session || !req.session.authenticated)) {
-			res.redirect("/login");
+		var permitRequiredUrls = ["/my", "/add", "/delete", "/like", "/favorites"];
+		if (permitRequiredUrls.indexOf(req.url) > -1  && (!req.session || !req.session.authenticated)) {
+			if(req.xhr){ // ajax request
+				res.status(400).send({"message" : "You must be logged in for this action", "redirect" : "login"});
+			} else {
+				res.redirect("/login");
+			}
 		} else {
 			next();
 		}
@@ -20,24 +25,6 @@ module.exports = function (express, app, path, bcrypt, dbClient) {
 
    	app.post("/login", function (req, res, next) {
 
-   		var userName = "User";
-   		var hash = "passwordHashByBcrypr";
-
-   		var login = req.body.login ? req.body.login : "";
-   		var password = req.body.password ? req.body.password : "";
-
-		if(login === userName){
-			bcrypt.compare(password, hash, function(err, result) {
-				if(result) {
-					req.session.authenticated = true;
-					res.redirect("/");
-				} else {
-					res.render("login", {"errorMessage" : "Password is incorrect."});
-				}
-			});
-		} else {
-			res.render("login", {"errorMessage" : "Login is incorrect."});
-		}
     });
 
     app.get("/logout", function (req, res, next) {

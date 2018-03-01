@@ -1,0 +1,56 @@
+<div class="modal fade" id="addPictModal" tabindex="-1" role="dialog" aria-labelledby="addPictModal" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title text-center" id="addPictModalLabel">Share the picture that inspire you</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row text-center">
+                    <img id="imagePlaceholder" src="/img/default.jpg" height="200" onError="this.onerror=null;this.src='/img/default.jpg';"/>
+                </div>
+                <form>
+                    <div class="form-group">
+                        <label for="link">Link</label>
+                        <input type="text" class="form-control" id="link" placeholder="Insert link to image">
+                    </div>
+                    <div class="form-group">
+                        <label for="description">Description</label>
+                        <textarea class="form-control" id="description" rows="3"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <p id="message"></p>
+                <button type="button" class="btn" id="addPicture">Add</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    $("#link").keyup(function(){
+        console.log($(this).val());
+        if($(this).val().trim() !=""){
+            $("#imagePlaceholder").attr("src", $(this).val().trim());
+        }
+    });
+
+    $("#addPicture").click(function(){
+        $.post("add",
+        {
+            link : $("#link").val().trim(),
+            description : $("#description").val().trim()
+        },
+        function(data, status){
+            $("#message").text(data.message);
+            window.location.href = data.redirect;
+        }).fail(function(data, status) {
+            $("#message").text(data.message);
+        });
+    });
+
+</script>

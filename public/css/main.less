@@ -9,12 +9,13 @@
 html, body {
 	margin:0;
 	padding:0;
-	height:100%;
+	background-color: @darkBlue;
+	font-size: 14px;
 }
 
-body{
-	font-size: 14px;
-	background-color: @darkBlue;
+body {
+	height:100%;
+    width: 100%;
 }
 
 #header{
@@ -69,6 +70,7 @@ body{
 
 #content h1{
 	color: @white;
+	margin-bottom: 40px;
 }
 
 #content hr {
@@ -77,15 +79,39 @@ body{
 	 border-top: 3px double #eee;
 }
 
+.modal-title{
+	float: left;
+	color: @darkBlue;
+}
+
 #footer{
     width: 100%;
     line-height: 20px;
     padding: 20px;
     border-top: 3px double @white;
+    color: @white;
 }
 
 button:focus {outline:0;}
 .btn:focus,.btn:active:focus,.btn.active:focus,
 .btn.focus,.btn:active.focus,.btn.active.focus {
     outline: none;
+}
+
+button.btn{
+	border-radius: 0;
+	background-color: #3c4f6d;
+	border-top: 1px solid rgba(255, 255, 255, 0.9);
+    color: @white;
+}
+
+
+button.btn:hover, button.btn:active{
+	background-color: @white;
+	color: @darkBlue;
+	border-top: 1px solid @blue;
+}
+
+button.btn:focus{
+	color: @blue;
 }

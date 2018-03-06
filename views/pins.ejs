@@ -2,5 +2,22 @@
 <div class="row text-right">
 <div class="col-sm-12"><button class="btn" data-toggle="modal" data-target="#addPictModal">Add new picture</button></div>
 </div>
+
+<div class="grid">
+    <%for(var i=0; i<pictures.length; i++){%>
+    <div class="grid-item text-center">
+        <img src="<%=pictures[i].link%>" alt="<%=pictures[i].description%>" width="200"/>
+        <p><%=pictures[i].description%></p>
+    </div>
+    <%}%>
+</div>
+
+<script>
+    $('.grid').masonry({
+      columnWidth: 200,
+      itemSelector: '.grid-item'
+    });
+</script>
+
 <% include partial/footer %>
 <% include partial/modal %>

@@ -1,3 +1,18 @@
 <% include partial/header %>
-    Some content here
+
+<div class="grid">
+    <%for(var i=0; i<pictures.length; i++){%>
+        <div class="grid-item text-center">
+            <img src="<%=pictures[i].link%>" alt="<%=pictures[i].description%>" width="200"/>
+            <p><%=pictures[i].description%></p>
+        </div>
+    <%}%>
+</div>
+
+<script>
+    $('.grid').masonry({
+      columnWidth: 200,
+      itemSelector: '.grid-item'
+    });
+</script>
 <% include partial/footer %>

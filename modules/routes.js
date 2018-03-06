@@ -26,7 +26,16 @@ module.exports = function (express, app, path, bcrypt, dbClient) {
 	}
 
 	app.get("/", checkAuth, function (req, res, next) {
-    		res.render("index");
+		var query = {
+			text: 'select * from pictures',
+		}
+		dbClient.query(query, (err, result) => {
+			if (err){
+				handleError("Error to get pictures: " + err, res);
+			} else {
+				res.render("index", {"pictures" : result.rows});
+			}
+		});
     });
 
 	app.get("/login", function (req, res, next) {
@@ -50,7 +59,17 @@ module.exports = function (express, app, path, bcrypt, dbClient) {
     });
 
     app.get("/pins", checkAuth, function (req, res, next) {
-        	res.render("pins", {});
+		var query = {
+			text: 'select * from pictures where userid = $1',
+			values: [req.session.user]
+		}
+		dbClient.query(query, (err, result) => {
+			if (err){
+				handleError("Error to get pictures: " + err, res);
+			} else {
+				res.render("pins", {"pictures" : result.rows});
+			}
+		});
     });
 
     app.post("/add", checkAuth, function (req, res, next) {

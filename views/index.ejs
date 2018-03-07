@@ -1,18 +1,35 @@
 <% include partial/header %>
 
-<div class="grid">
-    <%for(var i=0; i<pictures.length; i++){%>
-        <div class="grid-item text-center">
-            <img src="<%=pictures[i].link%>" alt="<%=pictures[i].description%>" width="200"/>
-            <p><%=pictures[i].description%></p>
+<% if(mode == "personal"){%>
+        <div class="row text-right">
+                <div class="col-sm-12"><button class="btn" data-toggle="modal" data-target="#addPictModal">Add new picture</button></div>
         </div>
-    <%}%>
+<%}%>
+
+<div class="grid">
+        <%for(var i=0; i<pictures.length; i++){%>
+                <div class="grid-item text-center">
+                        <img src="<%=pictures[i].link%>" alt="<%=pictures[i].description%>" width="200"/>
+                        <h4><%=pictures[i].description%></h4>
+                        <% if(mode == "personal"){%>
+                                <button id="delete-<%=pictures[i].id%>">delete</button>
+                        <%}%>
+                        <button id="like-unlike-<%=pictures[i].id%>"><%=pictures[i].likes%>like/unlike</button>
+                </div>
+        <%}%>
 </div>
 
 <script>
+  $(document).ready(function(){
     $('.grid').masonry({
-      columnWidth: 200,
+      /*columnWidth: 16,*/
+      gutter: 5,
       itemSelector: '.grid-item'
     });
+  });
 </script>
+
 <% include partial/footer %>
+<% if(mode == "personal"){%>
+        <% include partial/modal %>
+<%}%>

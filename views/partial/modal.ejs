@@ -47,7 +47,7 @@
         },
         function(data, status){
             $("#message").text(data.message);
-            window.location.href = data.redirect;
+            setInterval(function(){window.location.href = data.redirect}, 1000);
         }).fail(function(data, status) {
             $("#message").text(data.message);
         });

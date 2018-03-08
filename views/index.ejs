@@ -12,9 +12,16 @@
                         <img src="<%=pictures[i].link%>" alt="<%=pictures[i].description%>" width="200"/>
                         <h4><%=pictures[i].description%></h4>
                         <% if(mode == "personal"){%>
-                                <button id="delete-<%=pictures[i].id%>">delete</button>
+                                <i class="deletePicture far fa-trash-alt" id="delete-<%=pictures[i].id%>" onclick="deletePicture(this, <%=pictures[i].id%>)"></i>
                         <%}%>
-                        <button id="like-unlike-<%=pictures[i].id%>"><%=pictures[i].likes%>like/unlike</button>
+                        <span class="likes">
+                                <span class="value"><%=pictures[i].likes%></span>
+                                <% if(pictures[i].userlikes == false){%>
+                                        <i class="far fa-heart like" id="like-<%=pictures[i].id%>" onclick="like(this, <%=pictures[i].id%>)"></i>
+                                <%} else {%>
+                                        <i class="fas fa-heart unlike" id="unlike-<%=pictures[i].id%>" onclick="unlike(this, <%=pictures[i].id%>)"></i>
+                                <%}%>
+                        </span>
                 </div>
         <%}%>
 </div>
@@ -27,6 +34,50 @@
       itemSelector: '.grid-item'
     });
   });
+
+  function deletePicture(e, id) {
+      var picture = $(e).parent();
+      $.post("delete",
+      {
+          pictureid : id
+      },
+      function(data, status){
+          picture.remove();
+      }).fail(function(data, status) {
+          $("#message").text(data.message);
+      });
+  };
+
+
+  function like(e, id){
+      var likeButton = $(e);
+      $.post("like",
+      {
+          pictureid : id
+      },
+      function(data, status){
+          var likes = + likeButton.prev().text();
+          $(likeButton.prev().text(1+likes));
+          likeButton.replaceWith('<i class="fas fa-heart unlike" id="unlike-' + id + '" onclick="unlike(this, ' + id + ')"></i>');
+      }).fail(function(data, status) {
+          $("#message").text(data.message);
+      });
+  };
+
+  function unlike(e, id){
+      var unlikeButton = $(e);
+      $.post("unlike",
+      {
+          pictureid : id
+      },
+      function(data, status){
+          var likes = + unlikeButton.prev().text();
+          $(unlikeButton.prev().text(1-likes));
+          unlikeButton.replaceWith('<i class="far fa-heart like" id="like-' + id + '" onclick="like(this, ' + id + ')"></i>');
+      }).fail(function(data, status) {
+          $("#message").text(data.message);
+      });
+  };
 </script>
 
 <% include partial/footer %>

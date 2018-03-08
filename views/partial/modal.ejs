@@ -33,7 +33,6 @@
 <script>
 
     $("#link").keyup(function(){
-        console.log($(this).val());
         if($(this).val().trim() !=""){
             $("#imagePlaceholder").attr("src", $(this).val().trim());
         }
@@ -47,7 +46,7 @@
         },
         function(data, status){
             $("#message").text(data.message);
-            setInterval(function(){window.location.href = data.redirect}, 1000);
+            setInterval(function(){window.location.href = data.redirect}, 500);
         }).fail(function(data, status) {
             $("#message").text(data.message);
         });

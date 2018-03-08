@@ -27,7 +27,11 @@ module.exports = function (express, app, path, bcrypt, dbClient) {
 
 	app.get("/", checkAuth, function (req, res, next) {
 		var query = {
-			text: 'select pictures.*, (select count(*) from favorites where favorites.pictureid = pictures.id) as likes from pictures',
+			text: 'select pictures.*, ' +
+			'(select count(*) from favorites where favorites.pictureid = pictures.id) as likes, ' +
+			'(select count(*) from favorites where (favorites.pictureid = pictures.id and favorites.userid = $1)) as userlikes' +
+			' from pictures',
+			values: [req.session.user]
 		}
 		dbClient.query(query, (err, result) => {
 			if (err){
@@ -60,7 +64,10 @@ module.exports = function (express, app, path, bcrypt, dbClient) {
 
 	app.get("/pins", checkAuth, function (req, res, next) {
 		var query = {
-			text: 'select pictures.*, (select count(*) from favorites where favorites.pictureid = pictures.id) as likes from pictures where pictures.userid = $1',
+			text: 'select pictures.*, ' +
+			'(select count(*) from favorites where favorites.pictureid = pictures.id) as likes, ' +
+			'(select count(*) from favorites where (favorites.pictureid = pictures.id and favorites.userid = $1)) as userlikes' +
+			' from pictures where pictures.userid = $1',
 			values: [req.session.user]
 		}
 		dbClient.query(query, (err, result) => {
@@ -103,11 +110,11 @@ module.exports = function (express, app, path, bcrypt, dbClient) {
 	app.post("/delete", checkAuth, function (req, res, next) {
 		// TODO: check if it is in favorites
 		var query = {
-			text: 'delete from pictures where id = $1)',
+			text: 'delete from pictures where id = $1',
 			values: [req.body.pictureid.trim()]
 		}
 		dbClient.query(query, (err, result) => {
-			if (errInsert){
+			if (err){
 				handleError("Error to delete picture: " + err, res);
 			} else {
 				res.status(200).send({"message" : "delete-ok"});

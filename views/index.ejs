@@ -1,33 +1,35 @@
 <% include partial/header %>
 
 <% if(mode == "personal"){%>
-        <div class="row text-right">
+        <div class="row text-center">
                 <div class="col-sm-12"><button class="btn" data-toggle="modal" data-target="#addPictModal">Add new picture</button></div>
         </div>
 <%}%>
-
+<p id="message" class="text-center"></p>
 <div class="grid">
         <%for(var i=0; i<pictures.length; i++){%>
                 <div class="grid-item text-center">
                         <img src="<%=pictures[i].link%>" alt="<%=pictures[i].description%>" width="200"/>
-                        <h4><%=pictures[i].description%></h4>
-                        <% if(mode == "personal"){%>
+                        <h5><%=pictures[i].description%></h5>
+                        <% if(mode == "personal" && pictures[i].likes == 0){%>
                                 <i class="deletePicture far fa-trash-alt" id="delete-<%=pictures[i].id%>" onclick="deletePicture(this, <%=pictures[i].id%>)"></i>
                         <%}%>
-                        <span class="likes">
-                                <span class="value"><%=pictures[i].likes%></span>
-                                <% if(pictures[i].userlikes == false){%>
-                                        <i class="far fa-heart like" id="like-<%=pictures[i].id%>" onclick="like(this, <%=pictures[i].id%>)"></i>
-                                <%} else {%>
-                                        <i class="fas fa-heart unlike" id="unlike-<%=pictures[i].id%>" onclick="unlike(this, <%=pictures[i].id%>)"></i>
-                                <%}%>
-                        </span>
+                        <% if(mode != "personal"){%>
+                                <span class="likes">
+                                        <span class="value"><%=pictures[i].likes%></span>
+                                        <% if(pictures[i].userlikes == false){%>
+                                                <i class="far fa-heart like" id="like-<%=pictures[i].id%>" onclick="like(this, <%=pictures[i].id%>)"></i>
+                                        <%} else {%>
+                                                <i class="fas fa-heart unlike" id="unlike-<%=pictures[i].id%>" onclick="unlike(this, <%=pictures[i].id%>, <%=(mode == 'favorites')%>)"></i>
+                                        <%}%>
+                                </span>
+                        <%}%>
                 </div>
         <%}%>
 </div>
 
 <script>
-  $(document).ready(function(){
+  $(window).on('load', function(){
     $('.grid').masonry({
       /*columnWidth: 16,*/
       gutter: 5,
@@ -58,22 +60,26 @@
       function(data, status){
           var likes = + likeButton.prev().text();
           $(likeButton.prev().text(1+likes));
-          likeButton.replaceWith('<i class="fas fa-heart unlike" id="unlike-' + id + '" onclick="unlike(this, ' + id + ')"></i>');
+          likeButton.replaceWith('<i class="fas fa-heart unlike" id="unlike-' + id + '" onclick="unlike(this, ' + id + ', <%=(mode == 'favorites')%>)"></i>');
       }).fail(function(data, status) {
           $("#message").text(data.message);
       });
   };
 
-  function unlike(e, id){
+  function unlike(e, id, favorites){
       var unlikeButton = $(e);
+      var item = $(e).parent().parent();
       $.post("unlike",
       {
           pictureid : id
       },
       function(data, status){
           var likes = + unlikeButton.prev().text();
-          $(unlikeButton.prev().text(1-likes));
+          $(unlikeButton.prev().text(+(likes -1)));
           unlikeButton.replaceWith('<i class="far fa-heart like" id="like-' + id + '" onclick="like(this, ' + id + ')"></i>');
+          if(favorites){
+                item.remove();
+          }
       }).fail(function(data, status) {
           $("#message").text(data.message);
       });

@@ -14,7 +14,7 @@ module.exports = function (express, app, path, bcrypt, dbClient) {
 			next();
 		}*/
 		if(req.session.user === undefined){
-			req.session.user = 2;
+			req.session.user = 1;
 			req.session.authenticated = true;
 		}
 		next();
@@ -81,7 +81,7 @@ module.exports = function (express, app, path, bcrypt, dbClient) {
 
 	app.get("/favorites", checkAuth, function (req, res, next) {
 		var query = {
-			text: 'select pictures.*, (select count(*) from favorites where favorites.pictureid = pictures.id) as likes from favorites where favorites.userid = $1',
+			text: 'select *, (select count(*) from favorites where (favorites.pictureid = pictures.id)) as likes from favorites join pictures on (pictures.id = favorites.pictureid) where favorites.userid = $1',
 			values: [req.session.user]
 		}
 		dbClient.query(query, (err, result) => {
@@ -108,16 +108,30 @@ module.exports = function (express, app, path, bcrypt, dbClient) {
 	});
 
 	app.post("/delete", checkAuth, function (req, res, next) {
-		// TODO: check if it is in favorites
-		var query = {
-			text: 'delete from pictures where id = $1',
-			values: [req.body.pictureid.trim()]
+		var id = req.body.pictureid.trim();
+		var queryFavorites = {
+			text: 'select count(*) from favorites where pictureid = $1',
+			values: [id]
 		}
-		dbClient.query(query, (err, result) => {
-			if (err){
-				handleError("Error to delete picture: " + err, res);
+		dbClient.query(queryFavorites, (errFavorites, resultFavorites) => {
+			if (errFavorites){
+				handleError("Error to count favorites: " + errFavorites, res);
 			} else {
-				res.status(200).send({"message" : "delete-ok"});
+				if(resultFavorites.rows.count == 0){
+					var queryDelete = {
+						text: 'delete from pictures where id = $1',
+						values: [id]
+					}
+					dbClient.query(queryDelete, (errDelete, resultDelete) => {
+						if (errDelete){
+							handleError("Error to delete picture: " + errDelete, res);
+						} else {
+							res.status(200).send({"message" : "delete-ok"});
+						}
+					});
+				} else {
+					res.status(400).send({"message" : "can not delete picture with 'likes'"});
+				}
 			}
 		});
 	});

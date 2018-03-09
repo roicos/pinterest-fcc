@@ -29,13 +29,15 @@
 </div>
 
 <script>
-  $(window).on('load', function(){
-    $('.grid').masonry({
-      /*columnWidth: 16,*/
-      gutter: 5,
-      itemSelector: '.grid-item'
-    });
-  });
+
+$(document).ready(function(){        
+        setTimeout(function(){
+                $('.grid').masonry({
+                      gutter: 5,
+                      itemSelector: '.grid-item'
+                });
+        }, 100)
+});
 
   function deletePicture(e, id) {
       var picture = $(e).parent();

@@ -14,7 +14,7 @@ module.exports = function (express, app, path, bcrypt, dbClient) {
 			next();
 		}*/
 		if(req.session.user === undefined){
-			req.session.user = 1;
+			req.session.user = 3;
 			req.session.authenticated = true;
 		}
 		next();
@@ -30,7 +30,7 @@ module.exports = function (express, app, path, bcrypt, dbClient) {
 			text: 'select pictures.*, ' +
 			'(select count(*) from favorites where favorites.pictureid = pictures.id) as likes, ' +
 			'(select count(*) from favorites where (favorites.pictureid = pictures.id and favorites.userid = $1)) as userlikes' +
-			' from pictures',
+			' from pictures order by likes desc',
 			values: [req.session.user]
 		}
 		dbClient.query(query, (err, result) => {

@@ -41,7 +41,7 @@ app.use(bodyParser.urlencoded({
 
 // routing
 const modulesDir = "./modules"
-require(modulesDir + "/routes")(express, app, path, bcrypt, dbClient);
+require(modulesDir + "/routes")(express, app, path, bcrypt, dbClient, http);
 
 
 // OTHER MODULES

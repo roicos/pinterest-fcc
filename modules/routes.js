@@ -25,6 +25,18 @@ module.exports = function (express, app, path, bcrypt, dbClient) {
 		res.status(500).send({"message" : error});
 	}
 
+	function getAuthLink(){
+		var httpBuildQuery = require("http-build-query");
+		var url = "https://accounts.google.com/o/oauth2/auth";
+		var params = {
+			"redirect_uri" : "http://localhost:5000/google-auth",
+			"response_type" : "code",
+			"client_id"     : "620972017521-t60ui72f2ut4eqli2tekdn1qk2a2kses.apps.googleusercontent.com",
+			"scope"         : "https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile"
+		};
+		return url + "?" +  httpBuildQuery(params);
+	}
+
 	app.get("/", checkAuth, function (req, res, next) {
 		var query = {
 			text: 'select pictures.*, ' +
@@ -42,12 +54,40 @@ module.exports = function (express, app, path, bcrypt, dbClient) {
 		});
 	});
 
-	app.get("/login", function (req, res, next) {
-		res.render("login", {"errorMessage" : ""});
+	app.post("/login", function (req, res, next) {
+		res.status(200).send({"link" : getAuthLink()});
 	});
 
-	app.post("/login", function (req, res, next) {
+	app.get("/google-auth", function (req, res, next) {
+		var params = {
+			"client_id"     : "620972017521-t60ui72f2ut4eqli2tekdn1qk2a2kses.apps.googleusercontent.com",
+			"client_secret" : "KqQV_skAYxsdlpb0QSTXUb3p",
+			'redirect_uri'  : "http://localhost:5000/google-auth",
+			'grant_type' : 'authorization_code',
+			'code' : req.param("code")
+		};
 
+		var options = {
+		  host: "https://accounts.google.com",
+		  path: '/o/oauth2/token',
+		  port: '80',
+		  method: 'POST',
+		  form: params
+		};
+
+		callback = function(response) {
+			console.log(response);
+		  /*var str = ''
+		  response.on('data', function (chunk) {
+		    str += chunk;
+		  });
+
+		  response.on('end', function () {
+		    console.log(str);
+	    });*/
+		}
+
+		var req = http.request(options, callback);
 	});
 
 	app.get("/logout", function (req, res, next) {

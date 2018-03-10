@@ -6,35 +6,38 @@
         </div>
 <%}%>
 <p id="message" class="text-center"></p>
-<div class="grid">
-        <%for(var i=0; i<pictures.length; i++){%>
-                <div class="grid-item text-center">
-                        <img src="<%=pictures[i].link%>" alt="<%=pictures[i].description%>" width="200"/>
-                        <h5><%=pictures[i].description%></h5>
-                        <% if(mode == "personal" && pictures[i].likes == 0){%>
-                                <i class="deletePicture far fa-trash-alt" id="delete-<%=pictures[i].id%>" onclick="deletePicture(this, <%=pictures[i].id%>)"></i>
-                        <%}%>
-                        <% if(mode != "personal"){%>
-                                <span class="likes">
-                                        <span class="value"><%=pictures[i].likes%></span>
-                                        <% if(pictures[i].userlikes == false){%>
-                                                <i class="far fa-heart like" id="like-<%=pictures[i].id%>" onclick="like(this, <%=pictures[i].id%>)"></i>
-                                        <%} else {%>
-                                                <i class="fas fa-heart unlike" id="unlike-<%=pictures[i].id%>" onclick="unlike(this, <%=pictures[i].id%>, <%=(mode == 'favorites')%>)"></i>
-                                        <%}%>
-                                </span>
-                        <%}%>
-                </div>
-        <%}%>
+<div class="wrapper">
+        <div class="grid">
+                <%for(var i=0; i<pictures.length; i++){%>
+                        <div class="grid-item text-center">
+                                <img src="<%=pictures[i].link%>" alt="<%=pictures[i].description%>" width="200"/>
+                                <h5><%=pictures[i].description%></h5>
+                                <% if(mode == "personal" && pictures[i].likes == 0){%>
+                                        <i class="deletePicture far fa-trash-alt" id="delete-<%=pictures[i].id%>" onclick="deletePicture(this, <%=pictures[i].id%>)"></i>
+                                <%}%>
+                                <% if(mode != "personal"){%>
+                                        <span class="likes">
+                                                <span class="value"><%=pictures[i].likes%></span>
+                                                <% if(pictures[i].userlikes == false){%>
+                                                        <i class="far fa-heart like" id="like-<%=pictures[i].id%>" onclick="like(this, <%=pictures[i].id%>)"></i>
+                                                <%} else {%>
+                                                        <i class="fas fa-heart unlike" id="unlike-<%=pictures[i].id%>" onclick="unlike(this, <%=pictures[i].id%>, <%=(mode == 'favorites')%>)"></i>
+                                                <%}%>
+                                        </span>
+                                <%}%>
+                        </div>
+                <%}%>
+        </div>
 </div>
 
 <script>
 
-$(document).ready(function(){        
+$(document).ready(function(){
         setTimeout(function(){
                 $('.grid').masonry({
                       gutter: 5,
-                      itemSelector: '.grid-item'
+                      itemSelector: '.grid-item',
+                      fitWidth: true
                 });
         }, 100)
 });

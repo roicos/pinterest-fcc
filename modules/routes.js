@@ -1,18 +1,18 @@
-module.exports = function (express, app, path, bcrypt, dbClient) {
+module.exports = function (express, app, path, bcrypt, dbClient, http) {
 
 	app.use(express.static(path.join(__dirname, "../public")));
 
 	function checkAuth(req, res, next){
 		/*var permitRequiredUrls = ["/pins", "/add", "/delete", "/like", "/favorites"];
 		if (permitRequiredUrls.indexOf(req.url) > -1  && (!req.session || !req.session.authenticated)) {
-			if(req.xhr){ // ajax request
-				res.status(400).send({"message" : "You must be logged in for this action", "redirect" : "login"});
-			} else {
-				res.redirect("/login");
-			}
+		if(req.xhr){ // ajax request
+		res.status(400).send({"message" : "You must be logged in for this action", "redirect" : "login"});
 		} else {
-			next();
-		}*/
+		res.redirect("/login");
+	}
+	} else {
+	next();
+	}*/
 		if(req.session.user === undefined){
 			req.session.user = 3;
 			req.session.authenticated = true;
@@ -26,15 +26,20 @@ module.exports = function (express, app, path, bcrypt, dbClient) {
 	}
 
 	function getAuthLink(){
-		var httpBuildQuery = require("http-build-query");
-		var url = "https://accounts.google.com/o/oauth2/auth";
-		var params = {
-			"redirect_uri" : "http://localhost:5000/google-auth",
-			"response_type" : "code",
-			"client_id"     : "620972017521-t60ui72f2ut4eqli2tekdn1qk2a2kses.apps.googleusercontent.com",
-			"scope"         : "https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile"
-		};
-		return url + "?" +  httpBuildQuery(params);
+		var {google} = require('googleapis');
+		var OAuth2 = google.auth.OAuth2;
+
+		var oauth2Client = new OAuth2(
+			"620972017521-t60ui72f2ut4eqli2tekdn1qk2a2kses.apps.googleusercontent.com",
+			"KqQV_skAYxsdlpb0QSTXUb3p",
+			"http://localhost:5000/google-auth"
+		);
+		var url = oauth2Client.generateAuthUrl({
+	   		access_type: 'offline',
+			scope: ["https://www.googleapis.com/auth/userinfo.email", "https://www.googleapis.com/auth/userinfo.profile"],
+			approval_prompt : 'auto'
+		});
+		return url;
 	}
 
 	app.get("/", checkAuth, function (req, res, next) {
@@ -59,35 +64,35 @@ module.exports = function (express, app, path, bcrypt, dbClient) {
 	});
 
 	app.get("/google-auth", function (req, res, next) {
-		var params = {
-			"client_id"     : "620972017521-t60ui72f2ut4eqli2tekdn1qk2a2kses.apps.googleusercontent.com",
-			"client_secret" : "KqQV_skAYxsdlpb0QSTXUb3p",
-			'redirect_uri'  : "http://localhost:5000/google-auth",
-			'grant_type' : 'authorization_code',
-			'code' : req.param("code")
-		};
 
-		var options = {
-		  host: "https://accounts.google.com",
-		  path: '/o/oauth2/token',
-		  port: '80',
-		  method: 'POST',
-		  form: params
-		};
+		var {google} = require('googleapis');
+		var OAuth2 = google.auth.OAuth2;
 
-		callback = function(response) {
-			console.log(response);
-		  /*var str = ''
-		  response.on('data', function (chunk) {
-		    str += chunk;
-		  });
+		var oauth2Client = new OAuth2(
+			"620972017521-t60ui72f2ut4eqli2tekdn1qk2a2kses.apps.googleusercontent.com",
+			"KqQV_skAYxsdlpb0QSTXUb3p",
+			"http://localhost:5000/google-auth"
+		);
+		oauth2Client.getToken(req.query.code, function (errTokens, tokens) {
+			if (!errTokens) {
+				oauth2Client.setCredentials(tokens);
 
-		  response.on('end', function () {
-		    console.log(str);
-	    });*/
-		}
+				var oauth2 = google.oauth2({
+				  auth: oauth2Client,
+				  version: 'v2'
+				});
 
-		var req = http.request(options, callback);
+				oauth2.userinfo.get(function(errUser, resUser) {
+					if (errUser) {
+						console.log(errUser);
+					} else {
+						console.log(resUser.data);
+					}
+				});
+			} else {
+				console.log("error to get tokens: " + errTokens);
+			}
+		});
 	});
 
 	app.get("/logout", function (req, res, next) {

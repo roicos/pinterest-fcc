@@ -16,27 +16,27 @@ const bcrypt = require("bcrypt");
 const session = require("express-session");
 app.use(session(
 	{secret: "very-long-and-reliable-secret-word",
-         resave: false,
-         saveUninitialized: false
-    }));
+	resave: false,
+	saveUninitialized: false
+}));
 
 
 // db
 const pg = require("pg");
 var dbClient = new pg.Client({
-    user: "kqrrmlvmbmiuxo",
-    password: "9905205bd96665bcfeff239da6bf6a6740bbe6cea52227e2553c889f4fb9778a",
-    database: "d5n6384osfuqnh",
-    port: 5432,
-    host: "ec2-184-73-196-65.compute-1.amazonaws.com",
-    ssl: true
+	user: "kqrrmlvmbmiuxo",
+	password: "9905205bd96665bcfeff239da6bf6a6740bbe6cea52227e2553c889f4fb9778a",
+	database: "d5n6384osfuqnh",
+	port: 5432,
+	host: "ec2-184-73-196-65.compute-1.amazonaws.com",
+	ssl: true
 });
 dbClient.connect();
 
 // post request parser, sould be before routing
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({
-  	extended: true
+	extended: true
 }));
 
 // routing
@@ -48,5 +48,5 @@ require(modulesDir + "/routes")(express, app, path, bcrypt, dbClient, http);
 
 // START THE APP
 app.listen(app.get('port'), function() {
-  console.log('Node app is running on port', app.get('port'));
+	console.log('Node app is running on port', app.get('port'));
 });

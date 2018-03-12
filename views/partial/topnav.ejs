@@ -16,12 +16,12 @@
     </div>
 </nav>
 <script>
-        function loginUser(){
-                $.post("login",
-                function(data, status){
-                    window.location.href = data.link;
-                }).fail(function(data, status) {
-                    $("#message").text(data.message);
-                });
-        }
+function loginUser(){
+        $.post("login",
+        function(data, status){
+                window.location.href = data.link;
+        }).fail(function(data, status) {
+                $("#message").text(data.message);
+        });
+}
 </script>

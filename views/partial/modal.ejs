@@ -32,24 +32,24 @@
 
 <script>
 
-    $("#link").keyup(function(){
+$("#link").keyup(function(){
         if($(this).val().trim() !=""){
-            $("#imagePlaceholder").attr("src", $(this).val().trim());
+                $("#imagePlaceholder").attr("src", $(this).val().trim());
         }
-    });
+});
 
-    $("#addPicture").click(function(){
+$("#addPicture").click(function(){
         $.post("add",
         {
-            link : $("#link").val().trim(),
-            description : $("#description").val().trim()
+                link : $("#link").val().trim(),
+                description : $("#description").val().trim()
         },
         function(data, status){
-            $("#message").text(data.message);
-            setInterval(function(){window.location.href = data.redirect}, 500);
+                $("#message").text(data.message);
+                setInterval(function(){window.location.href = data.redirect}, 500);
         }).fail(function(data, status) {
-            $("#message").text(data.message);
+                $("#message").text(data.message);
         });
-    });
+});
 
 </script>

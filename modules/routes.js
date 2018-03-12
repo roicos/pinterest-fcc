@@ -3,27 +3,49 @@ module.exports = function (express, app, path, bcrypt, dbClient, http) {
 	app.use(express.static(path.join(__dirname, "../public")));
 
 	function checkAuth(req, res, next){
-		/*var permitRequiredUrls = ["/pins", "/add", "/delete", "/like", "/favorites"];
+		var permitRequiredUrls = ["/pins", "/add", "/delete", "/like", "/favorites"];
 		if (permitRequiredUrls.indexOf(req.url) > -1  && (!req.session || !req.session.authenticated)) {
-		if(req.xhr){ // ajax request
-		res.status(400).send({"message" : "You must be logged in for this action", "redirect" : "login"});
+			if(req.xhr){ // ajax request
+				res.status(400).send({"message" : "You must be logged in for this action"});
+			} else {
+				res.redirect("/login");
+			}
 		} else {
-		res.redirect("/login");
-	}
-	} else {
-	next();
-	}*/
-		if(req.session.user === undefined){
-			req.session.user = 3;
-			req.session.authenticated = true;
+			next();
 		}
-		next();
 	}
 
 	function handleError(error, res){
 		console.log(error);
 		res.status(500).send({"message" : error});
 	}
+
+	app.use(function(req, res, next) {
+		res.locals.userid = req.session.userid;
+		res.locals.username = req.session.username;
+		next();
+	});
+
+	app.get("/", checkAuth, function (req, res, next) {
+		var query = {
+			text: 'select pictures.*, ' +
+			'(select count(*) from favorites where favorites.pictureid = pictures.id) as likes, ' +
+			'(select count(*) from favorites where (favorites.pictureid = pictures.id and favorites.userid = $1)) as userlikes' +
+			' from pictures order by likes desc',
+			values: [req.session.userid]
+		}
+		dbClient.query(query, (err, result) => {
+			if (err){
+				handleError("Error to get pictures: " + err, res);
+			} else {
+				res.render("index", {"pictures" : result.rows, "mode" : "all"});
+			}
+		});
+	});
+
+	app.post("/login", function (req, res, next) {
+		res.status(200).send({"link" : getAuthLink()});
+	});
 
 	function getAuthLink(){
 		var {google} = require('googleapis');
@@ -41,27 +63,6 @@ module.exports = function (express, app, path, bcrypt, dbClient, http) {
 		});
 		return url;
 	}
-
-	app.get("/", checkAuth, function (req, res, next) {
-		var query = {
-			text: 'select pictures.*, ' +
-			'(select count(*) from favorites where favorites.pictureid = pictures.id) as likes, ' +
-			'(select count(*) from favorites where (favorites.pictureid = pictures.id and favorites.userid = $1)) as userlikes' +
-			' from pictures order by likes desc',
-			values: [req.session.user]
-		}
-		dbClient.query(query, (err, result) => {
-			if (err){
-				handleError("Error to get pictures: " + err, res);
-			} else {
-				res.render("index", {"pictures" : result.rows, "mode" : "all"});
-			}
-		});
-	});
-
-	app.post("/login", function (req, res, next) {
-		res.status(200).send({"link" : getAuthLink()});
-	});
 
 	app.get("/google-auth", function (req, res, next) {
 
@@ -84,16 +85,50 @@ module.exports = function (express, app, path, bcrypt, dbClient, http) {
 
 				oauth2.userinfo.get(function(errUser, resUser) {
 					if (errUser) {
-						console.log(errUser);
+						handleError("Error to get user data: " + errUser, resS);
 					} else {
-						console.log(resUser.data);
+						authorizeUser(resUser.data, req, res, next);
 					}
 				});
 			} else {
-				console.log("error to get tokens: " + errTokens);
+				console.log(errTokens, res);
 			}
 		});
 	});
+
+	function authorizeUser(data, req, res, next){
+		var querySelect = {
+			text: 'select * from users where google_id = $1',
+			values: [data.id]
+		}
+		dbClient.query(querySelect, (errSelect, resultSelect) => {
+			if (errSelect){
+				handleError("Error to get user: " + errSelect, res);
+			} else {
+				if(resultSelect.rows == 0){
+					var queryInsert = {
+						text: 'insert into users (google_id, email, username) values ($1, $2, $3) returning *',
+						values: [data.id, data.email, data.name]
+					}
+					dbClient.query(queryInsert, (errInsert, resultInsert) => {
+						if (errInsert){
+							handleError("Error to register user: " + errInsert, res);
+						} else {
+							req.session.userid = resultInsert.rows[0].id;
+							req.session.username = resultInsert.rows[0].username;
+							req.session.authenticated = true;
+							res.redirect("/");
+						}
+					});
+				} else {
+					req.session.userid = resultSelect.rows[0].id;
+					req.session.username = resultSelect.rows[0].username;
+					req.session.authenticated = true;
+					res.redirect("/");
+				}
+			}
+		});
+	}
 
 	app.get("/logout", function (req, res, next) {
 		if (req.session) {
@@ -113,7 +148,7 @@ module.exports = function (express, app, path, bcrypt, dbClient, http) {
 			'(select count(*) from favorites where favorites.pictureid = pictures.id) as likes, ' +
 			'(select count(*) from favorites where (favorites.pictureid = pictures.id and favorites.userid = $1)) as userlikes' +
 			' from pictures where pictures.userid = $1',
-			values: [req.session.user]
+			values: [req.session.userid]
 		}
 		dbClient.query(query, (err, result) => {
 			if (err){
@@ -127,7 +162,7 @@ module.exports = function (express, app, path, bcrypt, dbClient, http) {
 	app.get("/favorites", checkAuth, function (req, res, next) {
 		var query = {
 			text: 'select *, (select count(*) from favorites where (favorites.pictureid = pictures.id)) as likes from favorites join pictures on (pictures.id = favorites.pictureid) where favorites.userid = $1',
-			values: [req.session.user]
+			values: [req.session.userid]
 		}
 		dbClient.query(query, (err, result) => {
 			if (err){
@@ -141,7 +176,7 @@ module.exports = function (express, app, path, bcrypt, dbClient, http) {
 	app.post("/add", checkAuth, function (req, res, next) {
 		var query = {
 			text: 'insert into pictures (userid, link, description) values ($1, $2, $3)',
-			values: [req.session.user, req.body.link.trim(), req.body.description.trim()]
+			values: [req.session.userid, req.body.link.trim(), req.body.description.trim()]
 		}
 		dbClient.query(query, (errInsert, resultInsert) => {
 			if (errInsert){
@@ -184,7 +219,7 @@ module.exports = function (express, app, path, bcrypt, dbClient, http) {
 	app.post("/like", checkAuth, function (req, res, next) {
 		var query = {
 			text: 'insert into favorites (userid, pictureid) values ($1, $2)',
-			values: [req.session.user, req.body.pictureid.trim()]
+			values: [req.session.userid, req.body.pictureid.trim()]
 		}
 		dbClient.query(query, (err, result) => {
 			if (err){
@@ -198,7 +233,7 @@ module.exports = function (express, app, path, bcrypt, dbClient, http) {
 	app.post("/unlike", checkAuth, function (req, res, next) {
 		var query = {
 			text: 'delete from favorites where (userid = $1 and pictureid = $2)',
-			values: [req.session.user, req.body.pictureid.trim()]
+			values: [req.session.userid, req.body.pictureid.trim()]
 		}
 		dbClient.query(query, (err, result) => {
 			if (err){

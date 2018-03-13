@@ -91,7 +91,7 @@ module.exports = function (express, app, path, bcrypt, dbClient, http) {
 		var oauth2Client = new OAuth2(
 			"620972017521-t60ui72f2ut4eqli2tekdn1qk2a2kses.apps.googleusercontent.com",
 			"KqQV_skAYxsdlpb0QSTXUb3p",
-			t"https://boiling-shore-61218.herokuapp.com/google-auth"
+			"https://boiling-shore-61218.herokuapp.com/google-auth"
 		);
 		oauth2Client.getToken(req.query.code, function (errTokens,  tokens) {
 			if (!errTokens) {

@@ -50,6 +50,8 @@ body {
 
 .navbar .nav li:hover {
 	border-left: 3px solid @darkBlue;
+	cursor: pointer;
+	background-color: @white;
 }
 
 .navbar .nav li#logout {
@@ -69,12 +71,18 @@ body {
 	font-size: 10px;
 }
 
-.navbar .nav li a{
+.navbar .nav li a, .navbar .nav li p{
 	color: @white;
 }
 
-.navbar .nav li:hover a{
+.navbar .nav li:hover a, .navbar .nav li:hover p{
 	color: @blue;
+}
+
+.navbar .nav li p{
+	margin: 0;
+	position: relative;
+	padding: 10px 15px;
 }
 
 .navbar .nav li#logout:hover a{

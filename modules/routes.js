@@ -104,7 +104,7 @@ module.exports = function (express, app, path, bcrypt, dbClient, http) {
 
 				oauth2.userinfo.get(function(errUser, resUser) {
 					if (errUser) {
-						handleError("Error to get user data: " + errUser, resS);
+						handleError("Error to get user data: " + errUser, res);
 					} else {
 						authorizeUser(resUser.data, req, res, next);
 					}

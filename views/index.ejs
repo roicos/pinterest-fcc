@@ -10,7 +10,7 @@
         <div class="grid">
                 <%for(var i=0; i<pictures.length; i++){%>
                         <div class="grid-item text-center">
-                                <img src="<%=pictures[i].link%>" alt="<%=pictures[i].description%>" width="200"/>
+                                <img src="<%=pictures[i].link%>" alt="<%=pictures[i].description%>" width="200" onError="this.onerror=null;this.src='/img/default.jpg';"/>
                                 <h5><%=pictures[i].description%></h5>
                                 <% if(mode == "personal" && pictures[i].likes == 0){%>
                                         <i class="deletePicture far fa-trash-alt" id="delete-<%=pictures[i].id%>" onclick="deletePicture(this, <%=pictures[i].id%>)"></i>
@@ -52,7 +52,7 @@ function deletePicture(e, id) {
         function(data, status){
                 picture.remove();
         }).fail(function(data, status) {
-                $("#message").text(data.message);
+                $("#message").html(data.responseJSON.message);
         });
 };
 
@@ -68,7 +68,7 @@ function like(e, id){
                 $(likeButton.prev().text(1+likes));
                 likeButton.replaceWith('<i class="fas fa-heart unlike" id="unlike-' + id + '" onclick="unlike(this, ' + id + ', <%=(mode == 'favorites')%>)"></i>');
         }).fail(function(data, status) {
-                $("#message").text(data.message);
+                $("#message").html(data.responseJSON.message);
         });
 };
 
@@ -87,7 +87,7 @@ function unlike(e, id, favorites){
                         item.remove();
                 }
         }).fail(function(data, status) {
-                $("#message").text(data.message);
+                $("#message").html(data.responseJSON.message);
         });
 };
 </script>

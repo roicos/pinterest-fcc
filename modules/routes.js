@@ -180,7 +180,7 @@ module.exports = function (express, app, path, bcrypt, dbClient, http) {
 
 	app.get("/favorites", checkAuth, function (req, res, next) {
 		var query = {
-			text: 'select *, (select count(*) from favorites where (favorites.pictureid = pictures.id)) as likes from favorites join pictures on (pictures.id = favorites.pictureid) join users on (favorites.userid = users.id) where favorites.userid = $1',
+			text: 'select *, pictures.id as id, users.username as username, (select count(*) from favorites where (favorites.pictureid = pictures.id)) as likes from favorites join pictures on (pictures.id = favorites.pictureid) join users on (favorites.userid = users.id) where favorites.userid = $1',
 			values: [req.session.userid]
 		}
 		dbClient.query(query, (err, result) => {

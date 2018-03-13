@@ -16,6 +16,7 @@
                                         <i class="deletePicture far fa-trash-alt" id="delete-<%=pictures[i].id%>" onclick="deletePicture(this, <%=pictures[i].id%>)"></i>
                                 <%}%>
                                 <% if(mode != "personal"){%>
+                                        <a class="user" href="/<%=pictures[i].userid%>"><%=pictures[i].username%></a>
                                         <span class="likes">
                                                 <span class="value"><%=pictures[i].likes%></span>
                                                 <% if(pictures[i].userlikes == false){%>

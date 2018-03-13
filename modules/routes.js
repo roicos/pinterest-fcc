@@ -91,9 +91,9 @@ module.exports = function (express, app, path, bcrypt, dbClient, http) {
 		var oauth2Client = new OAuth2(
 			"620972017521-t60ui72f2ut4eqli2tekdn1qk2a2kses.apps.googleusercontent.com",
 			"KqQV_skAYxsdlpb0QSTXUb3p",
-			"https://boiling-shore-61218.herokuapp.com/google-auth"
+			t"https://boiling-shore-61218.herokuapp.com/google-auth"
 		);
-		oauth2Client.getToken(req.query.code, function (errTokens, tokens) {
+		oauth2Client.getToken(req.query.code, function (errTokens,  tokens) {
 			if (!errTokens) {
 				oauth2Client.setCredentials(tokens);
 
@@ -180,7 +180,7 @@ module.exports = function (express, app, path, bcrypt, dbClient, http) {
 
 	app.get("/favorites", checkAuth, function (req, res, next) {
 		var query = {
-			text: 'select *, (select count(*) from favorites where (favorites.pictureid = pictures.id)) as likes from favorites join users on (favorites.userid = users.id) join pictures on (pictures.id = favorites.pictureid) where favorites.userid = $1',
+			text: 'select *, (select count(*) from favorites where (favorites.pictureid = pictures.id)) as likes from favorites join pictures on (pictures.id = favorites.pictureid) join users on (favorites.userid = users.id) where favorites.userid = $1',
 			values: [req.session.userid]
 		}
 		dbClient.query(query, (err, result) => {
